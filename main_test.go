@@ -13,8 +13,8 @@ func TestFmt(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ins := make([]os.FileInfo, len(files)/2)
-	outs := make([]os.FileInfo, len(files)/2)
+	ins := make([]os.FileInfo, 0, len(files)/2)
+	outs := make([]os.FileInfo, 0, len(files)/2)
 
 	for _, file := range files {
 		if strings.Contains(file.Name(), ".in.") {
