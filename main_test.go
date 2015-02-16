@@ -28,4 +28,11 @@ func TestFmt(t *testing.T) {
 		t.Fatal("There is a different number of ins and out")
 	}
 
+	if len(ins) == 0 {
+		t.Fatal("There are no input files")
+	}
+
+	if len(outs) == 0 {
+		t.Fatal("There are no output files")
+	}
 }
