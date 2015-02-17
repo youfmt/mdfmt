@@ -118,10 +118,10 @@ func lexParagraph(l *blockLexer) lexerStateFn {
 	var line []byte
 	var err error
 
-	for err == nil {
+	for {
 		line, _, err = l.input.ReadLine()
-		if string(line) == "" {
-			continue
+		if err != nil {
+			break
 		}
 		l.lines = append(l.lines, string(line))
 	}

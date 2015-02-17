@@ -32,10 +32,7 @@ func (b block) Equals(other interface{}) bool {
 func describeBlockLexer(c gospec.Context) {
 	c.Specify("A blockLexer", func() {
 		c.Specify("Emits a paragraph", func() {
-			blocks := newBlockLexer(strings.NewReader(`
-some paragraph
-text
-`)).Run()
+			blocks := newBlockLexer(strings.NewReader("some paragraph\ntext")).Run()
 
 			b := <-blocks
 			c.Expect(b, Equals, block{
@@ -54,6 +51,7 @@ text
 				},
 			})
 		})
+
 	})
 }
 
