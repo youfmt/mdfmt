@@ -39,8 +39,8 @@ func describeBlockLexer(c gospec.Context) {
 				"EOF",
 			},
 		})
-
 	}
+
 	c.Specify("A blockLexer", func() {
 
 		c.Specify("Emits a paragraph", func() {
