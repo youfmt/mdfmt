@@ -50,7 +50,14 @@ type block struct {
 }
 
 func (b block) String() string {
-	return fmt.Sprintf("{%v, [%s]}", b.blockType, strings.Join(b.lines, ", "))
+	var lines string
+	if len(b.lines) == 0 {
+		lines = "EMPTY"
+	} else {
+		lines = strings.Join(b.lines, ", ")
+	}
+
+	return fmt.Sprintf("{%v, [%s]}", b.blockType, lines)
 }
 
 // run emits blocks
