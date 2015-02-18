@@ -101,6 +101,14 @@ func (bl *blockLexer) consumeLine() error {
 	return nil
 }
 
+func (bl *blockLexer) annihilateLine() error {
+	_, _, err := bl.input.ReadLine()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func lexBlock(l *blockLexer) lexerStateFn {
 	_, err := l.peek()
 	if err != nil {
