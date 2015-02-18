@@ -43,6 +43,23 @@ func describeBlockLexer(c gospec.Context) {
 
 	c.Specify("A blockLexer", func() {
 
+		c.Specify("Ignores insignificant whitespace", func() {
+			blocks := newBlockLexer(strings.NewReader("  some paragraph\n\n > some quote")).Run()
+			defer assumeEOFEmitted(blocks)
+
+			b := <-blocks
+			c.Expect(b, Equals, block{
+				blockType: BT_PARAGRAPH,
+				lines:     []string{"some paragraph"},
+			})
+
+			b = <-blocks
+			c.Expect(b, Equals, block{
+				blockType: BT_BLOCK_QUOTE,
+				lines:     []string{"> some quote"},
+			})
+		})
+
 		c.Specify("Emits a paragraph", func() {
 			blocks := newBlockLexer(strings.NewReader("some paragraph\ntext")).Run()
 			defer assumeEOFEmitted(blocks)

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"unicode"
 )
 
 type blockType int
@@ -107,12 +108,9 @@ func (l *blockLexer) consumeLine() error {
 	return nil
 }
 
-func (l *blockLexer) annihilateLine() error {
-	_, _, err := l.input.ReadLine()
-	if err != nil {
-		return err
-	}
-	return nil
+func (l *blockLexer) immolateRune() error {
+	_, _, err := l.input.ReadRune()
+	return err
 }
 
 var ErrUnexpectedInput = errors.New("unexpected input")
@@ -125,18 +123,23 @@ func lexBlock(l *blockLexer) lexerStateFn {
 	}
 
 	switch {
+	case isWhiteSpace(r):
+		return lexWorthlessSpace
+
 	case isParagraph(r):
 		return lexParagraph
 	case isBlockQuote(r):
 		return lexBlockQuote
 
-	case isBlank(r):
-		l.annihilateLine()
-		return lexBlock
 	default:
 		l.emitError(ErrUnexpectedInput)
 		return nil
 	}
+}
+
+func lexWorthlessSpace(l *blockLexer) lexerStateFn {
+	l.immolateRune()
+	return lexBlock
 }
 
 func lexBlockQuote(l *blockLexer) lexerStateFn {
@@ -203,6 +206,10 @@ func lexParagraph(l *blockLexer) lexerStateFn {
 	}
 
 	return lexBlock
+}
+
+func isWhiteSpace(r rune) bool {
+	return unicode.IsSpace(r)
 }
 
 func isParagraph(r rune) bool {
