@@ -83,6 +83,15 @@ func (bl *blockLexer) emit(bt blockType) {
 	}
 }
 
+func (bl *blockLexer) consumeLine() error {
+	line, _, err := bl.input.ReadLine()
+	if err != nil {
+		return err
+	}
+	bl.lines = append(bl.lines, string(line))
+	return nil
+}
+
 func lexBlock(l *blockLexer) lexerStateFn {
 	_, err := l.peek()
 	if err != nil {
@@ -115,18 +124,28 @@ func lexCodeBlock(*blockLexer) lexerStateFn {
 }
 
 func lexParagraph(l *blockLexer) lexerStateFn {
-	var line []byte
-	var err error
-
 	for {
-		line, _, err = l.input.ReadLine()
+		r, err := l.peek()
 		if err != nil {
 			break
 		}
-		l.lines = append(l.lines, string(line))
+
+		if !continuesParagraph(r) {
+			break
+		}
+
+		l.consumeLine()
 	}
 
 	l.emit(BT_PARAGRAPH)
 
 	return lexBlock
+}
+
+func continuesParagraph(r rune) bool {
+	// FIXME: this is totally fmted
+	//        if a line it's indented
+	//        w/ 4 spaces, it's a code block
+	i := strings.IndexRune("*-+\n>", r)
+	return i < 0
 }
