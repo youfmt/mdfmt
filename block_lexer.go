@@ -3,6 +3,7 @@ package mdfmt
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -114,6 +115,8 @@ func (bl *blockLexer) annihilateLine() error {
 	return nil
 }
 
+var ErrUnexpectedInput = errors.New("unexpected input")
+
 func lexBlock(l *blockLexer) lexerStateFn {
 	r, err := l.peek()
 	if err != nil {
@@ -121,11 +124,19 @@ func lexBlock(l *blockLexer) lexerStateFn {
 		return nil
 	}
 
-	if !isParagraph(r) {
+	switch {
+	case isParagraph(r):
+		return lexParagraph
+
+	case !isParagraph(r):
 		l.annihilateLine()
+		return lexBlock
+
+	default:
+		l.emitError(ErrUnexpectedInput)
 	}
 
-	return lexParagraph
+	return nil
 }
 
 func lexBlockQuote(*blockLexer) lexerStateFn {
