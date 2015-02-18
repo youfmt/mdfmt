@@ -110,11 +110,15 @@ func (bl *blockLexer) annihilateLine() error {
 }
 
 func lexBlock(l *blockLexer) lexerStateFn {
-	_, err := l.peek()
+	r, err := l.peek()
 	if err != nil {
 		l.lines = append(l.lines, err.Error())
 		l.emit(BT_ERROR)
 		return nil
+	}
+
+	if !isParagraph(r) {
+		l.annihilateLine()
 	}
 
 	return lexParagraph
@@ -147,19 +151,25 @@ func lexParagraph(l *blockLexer) lexerStateFn {
 			break
 		}
 
-		if !continuesParagraph(r) {
+		if !isParagraph(r) {
 			break
 		}
 
-		l.consumeLine()
+		err = l.consumeLine()
+		if err != nil {
+			break
+		}
+
 	}
 
-	l.emit(BT_PARAGRAPH)
+	if len(l.lines) > 0 {
+		l.emit(BT_PARAGRAPH)
+	}
 
 	return lexBlock
 }
 
-func continuesParagraph(r rune) bool {
+func isParagraph(r rune) bool {
 	// FIXME: this is totally fmted
 	//        if a line it's indented
 	//        w/ 4 spaces, it's a code block

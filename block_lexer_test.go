@@ -58,6 +58,22 @@ func describeBlockLexer(c gospec.Context) {
 
 		})
 
+		c.Specify("Emits several paragraphs", func() {
+			blocks := newBlockLexer(strings.NewReader("paragraph1\n\nparagraph2")).Run()
+			defer assumeEOFEmitted(blocks)
+
+			b := <-blocks
+			c.Expect(b, Equals, block{
+				BT_PARAGRAPH,
+				[]string{"paragraph1"},
+			})
+
+			b = <-blocks
+			c.Expect(b, Equals, block{
+				BT_PARAGRAPH,
+				[]string{"paragraph2"},
+			})
+		})
 	})
 }
 
