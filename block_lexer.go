@@ -76,8 +76,10 @@ func (bl *blockLexer) Run() <-chan block {
 
 func (bl *blockLexer) peek() (rune, error) {
 	r, _, err := bl.input.ReadRune()
-	bl.input.UnreadRune()
-	return r, err
+	if err != nil {
+		return r, err
+	}
+	return r, bl.input.UnreadRune()
 }
 
 func (bl *blockLexer) emit(bt blockType) {
