@@ -72,7 +72,6 @@ func describeBlockLexer(c gospec.Context) {
 					"text",
 				},
 			})
-
 		})
 
 		c.Specify("Emits several paragraphs", func() {
