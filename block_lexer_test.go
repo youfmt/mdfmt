@@ -30,9 +30,22 @@ func (b block) Equals(other interface{}) bool {
 }
 
 func describeBlockLexer(c gospec.Context) {
+
+	assumeEOFEmitted := func(blocks <-chan block) {
+		b := <-blocks
+		c.Assume(b, Equals, block{
+			blockType: BT_ERROR,
+			lines: []string{
+				"EOF",
+			},
+		})
+
+	}
 	c.Specify("A blockLexer", func() {
+
 		c.Specify("Emits a paragraph", func() {
 			blocks := newBlockLexer(strings.NewReader("some paragraph\ntext")).Run()
+			defer assumeEOFEmitted(blocks)
 
 			b := <-blocks
 			c.Expect(b, Equals, block{
@@ -43,13 +56,6 @@ func describeBlockLexer(c gospec.Context) {
 				},
 			})
 
-			b = <-blocks
-			c.Expect(b, Equals, block{
-				blockType: BT_ERROR,
-				lines: []string{
-					"EOF",
-				},
-			})
 		})
 
 	})
