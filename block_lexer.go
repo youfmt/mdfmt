@@ -127,20 +127,49 @@ func lexBlock(l *blockLexer) lexerStateFn {
 	switch {
 	case isParagraph(r):
 		return lexParagraph
+	case isBlockQuote(r):
+		return lexBlockQuote
 
-	case !isParagraph(r):
+	case isBlank(r):
 		l.annihilateLine()
 		return lexBlock
-
 	default:
 		l.emitError(ErrUnexpectedInput)
+		return nil
 	}
-
-	return nil
 }
 
-func lexBlockQuote(*blockLexer) lexerStateFn {
-	return nil
+func isBlank(r rune) bool {
+	return r == '\n'
+}
+
+func isBlockQuote(r rune) bool {
+	return r == '>'
+}
+
+func lexBlockQuote(l *blockLexer) lexerStateFn {
+	for {
+		r, err := l.peek()
+		if err != nil {
+			break
+		}
+
+		if !isBlockQuote(r) {
+			break
+		}
+
+		err = l.consumeLine()
+		if err != nil {
+			break
+		}
+
+	}
+
+	if len(l.lines) > 0 {
+		l.emit(BT_BLOCK_QUOTE)
+	}
+
+	return lexBlock
 }
 
 func lexListItem(*blockLexer) lexerStateFn {

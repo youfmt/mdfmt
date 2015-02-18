@@ -74,6 +74,17 @@ func describeBlockLexer(c gospec.Context) {
 				[]string{"paragraph2"},
 			})
 		})
+
+		c.Specify("Emits a block quote", func() {
+			blocks := newBlockLexer(strings.NewReader("> quoted\n> more quoted")).Run()
+			defer assumeEOFEmitted(blocks)
+
+			b := <-blocks
+			c.Expect(b, Equals, block{
+				BT_BLOCK_QUOTE,
+				[]string{"> quoted", "> more quoted"},
+			})
+		})
 	})
 }
 
