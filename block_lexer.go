@@ -139,14 +139,6 @@ func lexBlock(l *blockLexer) lexerStateFn {
 	}
 }
 
-func isBlank(r rune) bool {
-	return r == '\n'
-}
-
-func isBlockQuote(r rune) bool {
-	return r == '>'
-}
-
 func lexBlockQuote(l *blockLexer) lexerStateFn {
 	for {
 		r, err := l.peek()
@@ -219,4 +211,12 @@ func isParagraph(r rune) bool {
 	//        w/ 4 spaces, it's a code block
 	i := strings.IndexRune("*-+\n>", r)
 	return i < 0
+}
+
+func isBlockQuote(r rune) bool {
+	return r == '>'
+}
+
+func isBlank(r rune) bool {
+	return r == '\n'
 }
