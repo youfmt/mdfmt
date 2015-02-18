@@ -108,6 +108,11 @@ func (l *blockLexer) consumeLine() error {
 	return nil
 }
 
+func (l *blockLexer) immolateLine() error {
+	_, _, err := l.input.ReadLine()
+	return err
+}
+
 func (l *blockLexer) immolateRune() error {
 	_, _, err := l.input.ReadRune()
 	return err
@@ -124,7 +129,7 @@ func lexBlock(l *blockLexer) lexerStateFn {
 
 	switch {
 	case isWhiteSpace(r):
-		return lexWorthlessSpace
+		return startLexingSpace(l)
 
 	case isParagraph(r):
 		return lexParagraph
@@ -135,6 +140,47 @@ func lexBlock(l *blockLexer) lexerStateFn {
 		l.emitError(ErrUnexpectedInput)
 		return nil
 	}
+}
+
+func (l *blockLexer) peekLine() ([]byte, error) {
+	i := bufio.NewReader(l.input)
+	line, _, err := i.ReadLine()
+	return line, err
+}
+
+func startLexingSpace(l *blockLexer) lexerStateFn {
+	var fn lexerStateFn
+
+	fn = func(l *blockLexer) lexerStateFn {
+		line, err := l.peekLine()
+		// Burn empty lines
+		if isBlank(line) {
+			err := l.immolateLine()
+			if err != nil {
+				l.emitError(err)
+				return nil
+			}
+			return lexBlock
+		}
+
+		r, err := l.peek()
+		if err != nil {
+			l.emitError(err)
+			return nil
+		}
+
+		// Burn and store the rune
+		if isWhiteSpace(r) {
+			return fn
+		}
+
+		if isParagraph(r) {
+			return lexParagraph
+		}
+		return fn
+	}
+
+	return fn
 }
 
 func lexWorthlessSpace(l *blockLexer) lexerStateFn {
@@ -224,6 +270,6 @@ func isBlockQuote(r rune) bool {
 	return r == '>'
 }
 
-func isBlank(r rune) bool {
-	return r == '\n'
+func isBlank(line []byte) bool {
+	return false
 }
