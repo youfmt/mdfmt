@@ -62,53 +62,53 @@ func (b block) String() string {
 }
 
 // run emits blocks
-func (bl *blockLexer) Run() <-chan block {
+func (l *blockLexer) Run() <-chan block {
 	blocks := make(chan block)
 	go func() {
 		for stateFn := lexBlock; stateFn != nil; {
-			stateFn = stateFn(bl)
+			stateFn = stateFn(l)
 		}
 		close(blocks)
 	}()
 
-	bl.blocks = blocks
+	l.blocks = blocks
 	return blocks
 }
 
-func (bl *blockLexer) peek() (rune, error) {
-	r, _, err := bl.input.ReadRune()
+func (l *blockLexer) peek() (rune, error) {
+	r, _, err := l.input.ReadRune()
 	if err != nil {
 		return r, err
 	}
-	return r, bl.input.UnreadRune()
+	return r, l.input.UnreadRune()
 }
 
-func (bl *blockLexer) emit(bt blockType) {
-	lines := bl.lines
-	bl.lines = nil
+func (l *blockLexer) emit(bt blockType) {
+	lines := l.lines
+	l.lines = nil
 
-	bl.blocks <- block{
+	l.blocks <- block{
 		bt,
 		lines,
 	}
 }
 
-func (bl *blockLexer) emitError(err error) {
-	bl.lines = append(bl.lines, err.Error())
-	bl.emit(BT_ERROR)
+func (l *blockLexer) emitError(err error) {
+	l.lines = append(l.lines, err.Error())
+	l.emit(BT_ERROR)
 }
 
-func (bl *blockLexer) consumeLine() error {
-	line, _, err := bl.input.ReadLine()
+func (l *blockLexer) consumeLine() error {
+	line, _, err := l.input.ReadLine()
 	if err != nil {
 		return err
 	}
-	bl.lines = append(bl.lines, string(line))
+	l.lines = append(l.lines, string(line))
 	return nil
 }
 
-func (bl *blockLexer) annihilateLine() error {
-	_, _, err := bl.input.ReadLine()
+func (l *blockLexer) annihilateLine() error {
+	_, _, err := l.input.ReadLine()
 	if err != nil {
 		return err
 	}
