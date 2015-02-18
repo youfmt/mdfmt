@@ -92,6 +92,11 @@ func (bl *blockLexer) emit(bt blockType) {
 	}
 }
 
+func (bl *blockLexer) emitError(err error) {
+	bl.lines = append(bl.lines, err.Error())
+	bl.emit(BT_ERROR)
+}
+
 func (bl *blockLexer) consumeLine() error {
 	line, _, err := bl.input.ReadLine()
 	if err != nil {
@@ -112,8 +117,7 @@ func (bl *blockLexer) annihilateLine() error {
 func lexBlock(l *blockLexer) lexerStateFn {
 	r, err := l.peek()
 	if err != nil {
-		l.lines = append(l.lines, err.Error())
-		l.emit(BT_ERROR)
+		l.emitError(err)
 		return nil
 	}
 
